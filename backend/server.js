@@ -43,7 +43,7 @@ app.use(async (req, res, next) => {
     next();
   } catch (error) {
     console.log("Error in arcjet", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    next(error)
   }
 });
 
