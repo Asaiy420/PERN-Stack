@@ -33,8 +33,18 @@ app.use(async (req, res, next) => {
       } else {
         res.status(403).json({ error: "Forbidden" });
       }
+      return;
     }
-  } catch (error) {}
+    // check for spoofbots as well
+    if (decision.results.some((result) => result.reason.isBot() && result.reason.isSpoofed())){
+      res.status(403).json({error: "Spoofed Bot Detected"})
+      return;
+    }
+    next();
+  } catch (error) {
+    console.log("Error in arcjet", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 
 app.use("/api/products", productRoutes); // if someone uses the /api/products end point route them to productRoute
