@@ -5,6 +5,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import productRoutes from "./routes/productRoutes.js";
 import { sql } from "./config/db.js";
+import { aj } from "./lib/arcjet.js";
 
 dotenv.config(); // initializing the .env file
 
@@ -15,6 +16,26 @@ app.use(express.json());
 app.use(cors());
 app.use(helmet()); // helmet is a security middleware that prevents web vulnerabilities like clickjacking
 app.use(morgan("dev")); // morgan is a middle that helps to log incoming requests
+
+//applying arcjet rate limit and bot detection
+
+app.use(async (req, res, next) => {
+  try {
+    const decision = await aj.protect(req, {
+      requested: 1, // this specifies that each request will consume 1 token
+    });
+
+    if (decision.isDenied()) {
+      if (decision.reason.isRateLimit()) {
+        res.status(429).json({ error: "Too Many Requests" });
+      } else if (decision.reason.isBot()) {
+        res.status(403).json({ error: "Bot access denied!" });
+      } else {
+        res.status(403).json({ error: "Forbidden" });
+      }
+    }
+  } catch (error) {}
+});
 
 app.use("/api/products", productRoutes); // if someone uses the /api/products end point route them to productRoute
 
