@@ -1,8 +1,11 @@
 import React from "react";
 import { THEMES } from "../constants";
 import { PaletteIcon } from "lucide-react";
+import { useThemeStore } from "../store/useThemeStore";
+
 function ThemeSelector() {
-  const theme = "night";
+  const { theme, setTheme } = useThemeStore(); // Zustand store for theme management
+  console.log(theme);
   return (
     <div className="dropdown dropdown-end">
       {/* DROPDOWN */}
@@ -25,6 +28,8 @@ function ThemeSelector() {
                             : "hover:bg-base-content/5"
                         }
                     `}
+            onClick={() => setTheme(themeOption.name)}
+            
           >
             <PaletteIcon className="size-4" />
             <span className="text-sm font-medium">{themeOption.label}</span>
