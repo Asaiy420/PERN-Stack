@@ -10,6 +10,35 @@ export const useProductStore = create((set, get) => ({
   loading: false,
   error: null,
 
+  // form state
+  formData: {
+    name: "",
+    price: "",
+    image: "",
+  },
+
+  setFormData: (formData) => set({ formData }),
+  resetForm: () => set({ formData: { name: "", price: "", image: "" } }),
+
+  addProduct: async (e) => {
+    e.preventDefault();
+    set({ loading: true });
+
+    try {
+      const { formData } = get(); 
+      await axios.post(`${BASE_URL}/api/products`, formData);
+      await get().fetchProducts();
+      get().resetForm();
+      toast.success("Product added successfully");
+      document.getElementById("add_product_modal").close();
+    } catch (error) {
+      console.log("Error in addProduct function", error);
+      toast.error("Something went wrong");
+    } finally {
+      set({ loading: false });
+    }
+  },
+
   fetchProducts: async () => {
     set({ loading: true });
 
@@ -17,7 +46,8 @@ export const useProductStore = create((set, get) => ({
       const response = await axios.get(`${BASE_URL}/api/products`);
       set({ products: response.data.data, error: null }); // first data comes from axios and 2nd from our api
     } catch (err) {
-      if (err.response?.status === 429) set({ error: "Rate limit exceeded", products: [] });
+      if (err.response?.status === 429)
+        set({ error: "Rate limit exceeded", products: [] });
       else set({ error: "Something went wrong", products: [] });
     } finally {
       set({ loading: false });
@@ -25,16 +55,18 @@ export const useProductStore = create((set, get) => ({
   },
 
   deleteProducts: async (id) => {
-    set({loading: true})
+    set({ loading: true });
     try {
       await axios.delete(`${BASE_URL}/api/products/${id}`);
-      set(prev => ({products: prev.products.filter(product => product.id !== id)}));
-      toast.success("Product deleted successfully!")
+      set((prev) => ({
+        products: prev.products.filter((product) => product.id !== id),
+      }));
+      toast.success("Product deleted successfully!");
     } catch (error) {
       console.log("Error when deleting the product", error);
-      toast.error("Something went wrong...")
-    }finally{
-      set({loading: false})
+      toast.error("Something went wrong...");
+    } finally {
+      set({ loading: false });
     }
-  }
+  },
 }));
