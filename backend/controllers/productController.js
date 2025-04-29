@@ -38,7 +38,7 @@ export const getProduct = async (req, res) => {
   try {
     // get only the product that matches the id
     const product = await sql`
-            SELECT * products WHERE id = ${id} 
+            SELECT * FROM products WHERE id = ${id} 
         `;
     res.status(200).json({ success: true, data: product[0] });
   } catch (error) {
